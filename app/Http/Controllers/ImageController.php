@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Domains\ImageConverter\ImageConverter;
 use App\Helpers\FileHelper;
 use Illuminate\Http\Request;
-use Intervention\Image\Image;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class ImageController extends Controller
 {
@@ -27,22 +28,36 @@ class ImageController extends Controller
     }
 
     /**
-     * @param $url string File url
+     * @param $url string File Url
      * @param $width integer
      * @param $height integer
      */
     public function convertImage(Request $request)
     {
-        extract($request->only('width','height','url'));
+        extract($request->only('url', 'height', 'width'));
 
-        $linkFileFormat = pathinfo($url, PATHINFO_EXTENSION);
-        $file = FileHelper::putFileToTempDir($url);
+        $key = FileHelper::getCacheKey($url, $height, $width);
 
-        $image = $this->imageConverter
-            ->setFormat($linkFileFormat)
-            ->setFilePath($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $file)
-            ->crop($width,$height);
+        if (Cache::has($key)) {
+            $image = Cache::get($key);
 
-        return $image->toResponse();
+            Cache::put($key, $image, Carbon::now()->addHours(5));
+        } else {
+            $linkFileFormat = pathinfo($url, PATHINFO_EXTENSION);
+
+            $file = FileHelper::putFileToTempDir($url);
+
+            $image = $this->imageConverter
+                ->setFormat($linkFileFormat)
+                ->setFilePath($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $file)
+                ->crop($width, $height)
+                ->toResponse();
+
+            Cache::put($key, $image, Carbon::now()->addHours(5));
+
+            FileHelper::deleteFile($file);
+        }
+
+        return $image;
     }
 }

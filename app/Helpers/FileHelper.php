@@ -8,15 +8,22 @@ class FileHelper
 {
     public static function putFileToTempDir(string $url): string
     {
-        // Use basename() function to return the base name of file
-        $filePath = basename($url);
+        $filePath = uniqid("tmp_",true);
 
-        // Use file_get_contents() function to get the file
-        // from url and use file_put_contents() function to
-        // save the file by using base name
         if (!file_put_contents($filePath, file_get_contents($url))) {
             echo "File downloading failed.";
         }
         return $filePath;
+    }
+
+    public static function deleteFile(string $file): void
+    {
+        if (file_exists($file)) {
+            unlink($file);
+        }
+    }
+
+    public static function getCacheKey(string $url, int $height, int $width):string {
+        return "$url:$height:$width";
     }
 }

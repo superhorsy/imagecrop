@@ -9,7 +9,9 @@
         "ext-curl": "*",
         "guzzlehttp/guzzle": "^6.5",
         "intervention/image": "^2.5",
-        "laravel/lumen-framework": "^6.0"
+        "laravel/lumen-framework": "6.3.*",
+        "illuminate/redis": "6.3.*",
+        "predis/predis": "1.*"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.9.1",
