@@ -6,11 +6,11 @@ namespace App\Domains\ImageConverter;
 
 interface ImageConverter
 {
+    public function resize(int $width, int $height):ImageConverter;
+
     /**
-     * Returns cropped image filepath
-     * @param int $width
-     * @param int $height
-     * @return string
+     * Returns an array with mime type and image after conversion
+     * @return array
      */
-    public function crop(int $width, int $height):ImageConverter;
+    public function getData():array;
 }

@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUnusedParameterInspection */
 
 require_once __DIR__.'/../vendor/autoload.php';
 
@@ -57,6 +57,7 @@ $app->singleton(
 |
 */
 
+$app->configure('app');
 $app->configure('database');
 
 /*

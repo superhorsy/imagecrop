@@ -13,33 +13,29 @@ class ImagicImageConverter implements ImageConverter
      */
     private $image;
 
-    private $format;
-
     public function __construct()
     {
         Image::configure(array('driver' => 'imagick'));
     }
 
-    public function crop(int $width, int $height): ImageConverter
+    public function resize(int $width, int $height): ImageConverter
     {
         $this->image = $this->image->resize($width, $height);
         return $this;
     }
 
-    public function toResponse()
+    /**
+     * Returns an array with mime type and image after conversion
+     * @return array
+     */
+    public function getData():array
     {
-        return $this->image->response();
+        return [$this->image->mime(), $this->image->encode()];
     }
 
-    public function setFilePath(string $filePath): ImageConverter
+    public function setFile(string $file): ImageConverter
     {
-        $this->image = Image::make($filePath);
-        return $this;
-    }
-
-    public function setFormat($format): ImageConverter
-    {
-        $this->format = $format;
+        $this->image = Image::make($file);
         return $this;
     }
 }

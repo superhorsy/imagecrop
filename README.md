@@ -1,14 +1,19 @@
 # ImageCrop
 
-Simple proxy application to crop images on the fly.
+Simple proxy application to resize images on the fly.
 
 ## Use
 
 Enter your query in following format:
-{domain}/crop?width={width}&height={height}&url={url}
+{domain}/resize?width={width}&height={height}&url={url}
 
-## To Do
+## Features
 
-- Add security checks.
-- Add file validations.
-- Caching.
+- Redis image caching.
+- Remote image filesize validation.
+- Image bomb protection.
+- Filesize check.
+
+## MindMap
+
+[Click here to see mindmap](https://www.mindmeister.com/1427844314?t=EEIDLCfHTS)

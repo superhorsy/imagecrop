@@ -2,62 +2,47 @@
 
 namespace App\Http\Controllers;
 
-use App\Domains\ImageConverter\ImageConverter;
-use App\Helpers\FileHelper;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Cache;
 
 class ImageController extends Controller
 {
-    /**
-     * @var ImageConverter
-     */
-    private $imageConverter;
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct(ImageConverter $imageConverter)
+    public function __construct()
     {
         $this->middleware('fileSize');
-
-        $this->imageConverter = $imageConverter;
     }
 
-    /**
-     * @param $url string File Url
-     * @param $width integer
-     * @param $height integer
-     */
     public function convertImage(Request $request)
     {
-        extract($request->only('url', 'height', 'width'));
+        $this->validateResizeRequest($request);
 
-        $key = FileHelper::getCacheKey($url, $height, $width);
+        $cacheKey = "{$request->url}:{$request->width}x{$request->height}";
 
-        if (Cache::has($key)) {
-            $image = Cache::get($key);
+        $imageService = new ImageService($request->url, $cacheKey);
+        $imageService->resizeImage($request->width, $request->height);
 
-            Cache::put($key, $image, Carbon::now()->addHours(5));
-        } else {
-            $linkFileFormat = pathinfo($url, PATHINFO_EXTENSION);
 
-            $file = FileHelper::putFileToTempDir($url);
+        return response(
+            $imageService->getResultImage(),
+            200,
+            [
+                'Content-Type' => $imageService->getMime()
+            ]
+        );
+    }
 
-            $image = $this->imageConverter
-                ->setFormat($linkFileFormat)
-                ->setFilePath($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $file)
-                ->crop($width, $height)
-                ->toResponse();
+    private function validateResizeRequest($request)
+    {
+        $maxDimensions = config('app.imageDimensionsLimit');
 
-            Cache::put($key, $image, Carbon::now()->addHours(5));
-
-            FileHelper::deleteFile($file);
-        }
-
-        return $image;
+        $this->validate(
+            $request,
+            [
+                "url"    => "required|url",
+                "height" => "required|numeric|max:$maxDimensions",
+                "width"  => "required|numeric|max:$maxDimensions",
+            ]
+        );
     }
 }

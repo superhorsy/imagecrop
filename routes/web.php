@@ -1,4 +1,5 @@
 <?php
+/** @noinspection PhpUndefinedVariableInspection */
 
 /*
 |--------------------------------------------------------------------------
@@ -11,7 +12,7 @@
 |
 */
 
-$router->get('crop', 'ImageController@convertImage');
+$router->get('resize', 'ImageController@convertImage');
 
 $router->get('/', function () use ($router) {
     return $router->app->version();
